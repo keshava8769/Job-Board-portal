@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Browse Jobs{% endblock %}
+
+{% block content %}
+
+<!-- Hero Search Bar -->
+<div class="bg-dark text-white rounded-4 p-4 mb-4 shadow-sm">
+  <h2 class="fw-bold mb-1"><i class="bi bi-search me-2"></i>Find Your Next Job</h2>
+  <p class="text-muted mb-3">Search from hundreds of opportunities</p>
+  <form method="GET" action="{{ url_for('jobs.list_jobs') }}">
+    <div class="row g-2">
+      <div class="col-md-5">
+        <input type="text" name="search" class="form-control"
+               placeholder="Job title, skill, or company..."
+               value="{{ request.args.get('search', '') }}">
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="location" class="form-control"
+               placeholder="Location"
+               value="{{ request.args.get('location', '') }}">
+      </div>
+      <div class="col-md-2">
+        <select name="type" class="form-select">
+          <option value="">All Types</option>
+          <option value="full-time"   {% if request.args.get('type')=='full-time'   %}selected{% endif %}>Full-Time</option>
+          <option value="part-time"   {% if request.args.get('type')=='part-time'   %}selected{% endif %}>Part-Time</option>
+          <option value="internship"  {% if request.args.get('type')=='internship'  %}selected{% endif %}>Internship</option>
+          <option value="freelance"   {% if request.args.get('type')=='freelance'   %}selected{% endif %}>Freelance</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-search me-1"></i> Search
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Results count -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0 text-muted">
+    <span class="text-dark fw-bold">{{ jobs|length }}</span> job(s) found
+  </h5>
+  {% if current_user.is_authenticated and current_user.role == 'recruiter' %}
+    <a href="{{ url_for('jobs.post_job') }}" class="btn btn-success btn-sm">
+      <i class="bi bi-plus-lg me-1"></i> Post a Job
+    </a>
+  {% endif %}
+</div>
+
+<!-- Job Cards -->
+{% if jobs %}
+  {% for job in jobs %}
+  <div class="card border-0 shadow-sm rounded-4 mb-3 job-card">
+    <div class="card-body p-4">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h5 class="fw-bold mb-1">
+            <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}"
+               class="text-decoration-none text-dark">{{ job.title }}</a>
+          </h5>
+          <p class="text-muted mb-2">
+            <i class="bi bi-building me-1"></i>{{ job.company }}
+            {% if job.location %}
+              &nbsp;·&nbsp;<i class="bi bi-geo-alt me-1"></i>{{ job.location }}
+            {% endif %}
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            {% if job.job_type %}
+              <span class="badge bg-primary-subtle text-primary rounded-pill px-3">
+                {{ job.job_type }}
+              </span>
+            {% endif %}
+            {% if job.salary %}
+              <span class="badge bg-success-subtle text-success rounded-pill px-3">
+                <i class="bi bi-currency-dollar"></i>{{ job.salary }}
+              </span>
+            {% endif %}
+            {% if job.tags %}
+              {% for tag in job.tags.split(',')[:3] %}
+                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">
+                  {{ tag.strip() }}
+                </span>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+        <div class="text-end">
+          <small class="text-muted d-block mb-2">
+            <i class="bi bi-clock me-1"></i>
+            {{ job.posted_at.strftime('%b %d, %Y') }}
+          </small>
+          <a href="{{ url_for('jobs.job_detail', job_id=job.id) }}"
+             class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            View Details
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-inbox display-4 d-block mb-3"></i>
+    <h5>No jobs found matching your search.</h5>
+    <a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-outline-primary mt-2">Clear Filters</a>
+  </div>
+{% endif %}
+
+{% endblock %}

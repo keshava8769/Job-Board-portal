@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}{{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h2 class="fw-bold">{{ job.title }}</h2>
+        <p class="text-muted fs-5 mb-3">
+          <i class="bi bi-building me-1"></i>{{ job.company }}
+          {% if job.location %}
+            &nbsp;·&nbsp;<i class="bi bi-geo-alt me-1"></i>{{ job.location }}
+          {% endif %}
+        </p>
+
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          {% if job.job_type %}
+            <span class="badge bg-primary rounded-pill px-3 py-2">{{ job.job_type }}</span>
+          {% endif %}
+          {% if job.salary %}
+            <span class="badge bg-success rounded-pill px-3 py-2">
+              <i class="bi bi-cash me-1"></i>{{ job.salary }}
+            </span>
+          {% endif %}
+          <span class="badge bg-secondary rounded-pill px-3 py-2">
+            <i class="bi bi-calendar me-1"></i>
+            Posted {{ job.posted_at.strftime('%B %d, %Y') }}
+          </span>
+        </div>
+
+        <h5 class="fw-bold">Job Description</h5>
+        <p class="text-muted" style="white-space: pre-wrap;">{{ job.description }}</p>
+
+        {% if job.tags %}
+        <h5 class="fw-bold mt-3">Skills Required</h5>
+        <div class="d-flex flex-wrap gap-2">
+          {% for tag in job.tags.split(',') %}
+            <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
+              {{ tag.strip() }}
+            </span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Apply Sidebar -->
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 80px;">
+      <div class="card-body p-4">
+        {% if current_user.is_authenticated and current_user.role == 'student' %}
+          <h5 class="fw-bold mb-3">Apply for this Job</h5>
+          <form method="POST"
+                action="{{ url_for('applications.apply', job_id=job.id) }}"
+                enctype="multipart/form-data">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Upload Resume</label>
+              <input type="file" name="resume" class="form-control"
+                     accept=".pdf,.doc,.docx" required>
+              <small class="text-muted">PDF or Word · Max 5MB</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Cover Letter (optional)</label>
+              <textarea name="cover_letter" class="form-control" rows="4"
+                        placeholder="Tell the recruiter why you're a great fit..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 fw-semibold">
+              <i class="bi bi-send me-1"></i> Submit Application
+            </button>
+          </form>
+
+        {% elif current_user.is_authenticated and current_user.role == 'recruiter' %}
+          <div class="text-center text-muted py-3">
+            <i class="bi bi-info-circle display-6 d-block mb-2"></i>
+            Recruiter accounts cannot apply to jobs.
+          </div>
+          {% if job.recruiter_id == current_user.id %}
+            <a href="{{ url_for('jobs.delete_job', job_id=job.id) }}"
+               class="btn btn-outline-danger w-100 mt-2"
+               onclick="return confirm('Remove this job listing?')">
+              <i class="bi bi-trash me-1"></i> Remove Listing
+            </a>
+          {% endif %}
+
+        {% else %}
+          <div class="text-center py-3">
+            <i class="bi bi-lock display-6 d-block mb-2 text-muted"></i>
+            <p class="text-muted">Login to apply for this job</p>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary w-100">
+              Login to Apply
+            </a>
+            <a href="{{ url_for('auth.signup') }}" class="btn btn-outline-secondary w-100 mt-2">
+              Create Account
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="{{ url_for('jobs.list_jobs') }}" class="btn btn-outline-secondary mb-4">
+  <i class="bi bi-arrow-left me-1"></i> Back to Jobs
+</a>
+{% endblock %}
