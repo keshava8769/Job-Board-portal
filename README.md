@@ -206,7 +206,7 @@ This app is ready to deploy on [Render](https://render.com).
 Python Full-Stack Developer  
 📧 bairu.chennakeshava05@gmail.com  
 🔗 [GitHub](https://github.com/keshava8769)  
-🔗 [LinkedIn]([https://linkedin.com/in/bairu-chenna-keshava/])
+🔗 [LinkedIn](https://linkedin.com/in/bairu-chenna-keshava/)
 
 ---
 
